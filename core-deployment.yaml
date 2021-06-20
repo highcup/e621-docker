@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: core
+  name: core
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: core
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: core
+    spec:
+      containers:
+      - env:
+        - name: DANBOORU_ELASTICSEARCH_HOST
+          value: es
+        - name: DANBOORU_MEMCACHED_SERVERS
+          value: memcached:11211
+        - name: DANBOORU_REDIS_URL
+          value: redis://redis:6379
+        - name: DANBOORU_SSL_OPTIONS
+          value: '{}'
+        - name: DATABASE_URL
+          value: postgresql://sql/danbooru2
+        - name: PGDATABASE
+          value: danbooru2
+        - name: PGPASSWORD
+          value: changethis
+        - name: PGUSER
+          value: root
+        - name: REDIS_URL
+          value: redis://redis:6379
+        - name: SECRET_TOKEN
+        - name: SESSION_SECRET_KEY
+        - name: SKIP_CLOUDFLARE_CHECK
+        - name: WAIT_HOSTS
+          value: sql:5432, es:9200, memcached:11211, redis:6379
+        - name: WAIT_HOSTS_TIMEOUT
+          value: "180"
+        image: noirscape/e621:core
+        imagePullPolicy: ""
+        name: core
+        resources: {}
+        volumeMounts:
+        - mountPath: /app/config/danbooru_local_config.rb
+          name: core-claim0
+        - mountPath: /app/public
+          name: static-files
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - name: core-claim0
+        persistentVolumeClaim:
+          claimName: core-claim0
+      - name: static-files
+        persistentVolumeClaim:
+          claimName: static-files
+status: {}

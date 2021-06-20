@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: frontend
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: frontend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: frontend
+    spec:
+      containers:
+      - args:
+        - /bin/bash
+        - -c
+        - envsubst '9000' < /etc/nginx/conf.d/e621.nginx.conf.templ > /etc/nginx/conf.d/default.conf
+          && exec nginx -g 'daemon off;'
+        image: noirscape/e621:frontend
+        imagePullPolicy: ""
+        name: frontend
+        ports:
+        - containerPort: 9000
+        resources: {}
+        volumeMounts:
+        - mountPath: /var/www/danbooru/current/public
+          name: static-files
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - name: static-files
+        persistentVolumeClaim:
+          claimName: static-files
+status: {}
